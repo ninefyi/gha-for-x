@@ -7,19 +7,10 @@ jobs:
     runs-on: macos-latest
     env:
       JAVA_VERSION: "11.0"
-      FLUTTER_VERSION: "3.0.4"
-      WORKING_DIRECTORY: "./flutter_app"
-      ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
-      ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD }}
-      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      FLUTTER_VERSION: "3.3.2"
+      WORKING_DIRECTORY: "./hello_flutter"
     steps:
       - uses: actions/checkout@v3
-      - name: Decode Keystore
-        id: write_file
-        uses: timheuer/base64-to-file@v1.1
-        with:
-          fileName: "${{ secrets.ANDROID_KEYSTORE_FILENAME }}"
-          encodedString: ${{ secrets.ANDROID_KEYSTORE }}
       - uses: actions/setup-java@v3
         with:
           java-version: ${{env.JAVA_VERSION}}
@@ -28,25 +19,14 @@ jobs:
         with:
           flutter-version: ${{env.FLUTTER_VERSION}}
       - run: flutter pub get
-        working-directory: ./flutter_app
+        working-directory: ${{env.WORKING_DIRECTORY}}
       - run: flutter build apk
-        working-directory: ./flutter_app
-        env:
-          ANDROID_KEYSTORE_PATH: ${{ steps.write_file.outputs.filePath }}       
-      - run: flutter build appbundle
-        working-directory: ./flutter_app
-        env:
-          ANDROID_KEYSTORE_PATH: ${{ steps.write_file.outputs.filePath }}
+        working-directory: ${{env.WORKING_DIRECTORY}}     
       - name: Archive apk artifacts
         uses: actions/upload-artifact@v2
         with:
           name: apk
-          path: flutter_app/build/app/outputs/flutter-apk/app-release.apk
-      - name: Archive aab artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: aab
-          path: flutter_app/build/app/outputs/bundle/release/app-release.aab
+          path: ${{env.WORKING_DIRECTORY}}/build/app/outputs/flutter-apk/app-release.apk
   release:
     name: release to firebase app distribution
     needs: build
@@ -54,13 +34,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
-        name: Download aab
+        name: Download apk
         with:
           name: apk
           path: tmp/apk
       - run: ls -R
         working-directory: tmp/apk
-      - name: Upload AAB to Firebase App Distribution Action
+      - name: Upload APK to Firebase App Distribution Action
         uses: wzieba/Firebase-Distribution-Github-Action@v1.3.4
         with:
           appId: ${{secrets.FIREBASE_ANDROID_APP_ID}}

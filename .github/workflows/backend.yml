@@ -11,4 +11,5 @@ jobs:
         working-directory: "./backend/functions"
       - run: | 
           firebase deploy --only functions --token ${{ secrets.FIREBASE_TOKEN }}
+        working-directory: "./backend"
   
