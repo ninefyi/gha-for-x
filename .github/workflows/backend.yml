@@ -7,9 +7,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: npm ci && npm run build
+        working-directory: "./frontend"
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GHA_DEMO_90F44 }}'
           channelId: live
           projectId: gha-demo-90f44
+          entryPoint: "./frontend"
