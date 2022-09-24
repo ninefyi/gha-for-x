@@ -3,6 +3,8 @@
 ## GitHub for Everyone
 NodeJS: [Download](https://nodejs.org/en/download/)
 
+## Setup firebase tools
+
 ```bash
  npm install -g firebase-tools
 ```
